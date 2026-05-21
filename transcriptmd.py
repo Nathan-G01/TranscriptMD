@@ -10,6 +10,7 @@ from typing import Sequence
 
 
 TIMESTAMP_PATTERN = re.compile(r"^\s*\d{1,2}:[0-5]\d\s*$")
+TIMESTAMP_PREFIX_PATTERN = re.compile(r"^\s*\d{1,2}:[0-5]\d\s+(.+?)\s*$")
 WHITESPACE_PATTERN = re.compile(r"\s+")
 
 
@@ -53,8 +54,16 @@ def read_input(input_path: Path) -> list[str]:
 
 
 def remove_timestamps(lines: Sequence[str]) -> list[str]:
-    """Remove lines that contain only mm:ss timestamps."""
-    filtered = [line for line in lines if not TIMESTAMP_PATTERN.match(line)]
+    """Remove pure mm:ss lines and strip leading mm:ss when followed by text."""
+    filtered: list[str] = []
+    for line in lines:
+        if TIMESTAMP_PATTERN.match(line):
+            continue
+        match = TIMESTAMP_PREFIX_PATTERN.match(line)
+        if match:
+            filtered.append(normalize_whitespace(match.group(1)))
+            continue
+        filtered.append(line)
     if not any(filtered):
         raise ValueError("Empty transcript after removing timestamp lines.")
     return filtered

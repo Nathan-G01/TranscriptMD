@@ -80,6 +80,16 @@ class TranscriptMDTests(unittest.TestCase):
             with self.assertRaisesRegex(ValueError, "empty output"):
                 write_output("   ", output_path)
 
+    def test_remove_timestamps_strips_leading_timestamp_from_text(self) -> None:
+        cleaned = remove_timestamps(
+            ["00:00 Intro", "00:04 This is the intro", "", "01:15 Deep Dive"]
+        )
+        self.assertEqual(cleaned, ["Intro", "This is the intro", "", "Deep Dive"])
+
+    def test_remove_timestamps_keeps_non_timestamp_text(self) -> None:
+        lines = ["Intro", "This is plain text", "", "Deep Dive", "More details"]
+        self.assertEqual(remove_timestamps(lines), lines)
+
 
 if __name__ == "__main__":
     unittest.main()
