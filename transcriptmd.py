@@ -9,7 +9,7 @@ from pathlib import Path
 from typing import Sequence
 
 
-TIMESTAMP_PATTERN = re.compile(r"^\s*\d{1,2}:\d{2}\s*$")
+TIMESTAMP_PATTERN = re.compile(r"^\s*\d{1,2}:[0-5]\d\s*$")
 WHITESPACE_PATTERN = re.compile(r"\s+")
 
 

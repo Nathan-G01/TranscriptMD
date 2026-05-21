@@ -74,6 +74,12 @@ class TranscriptMDTests(unittest.TestCase):
             self.assertTrue(output_path.exists())
             self.assertEqual(output_path.read_text(encoding="utf-8"), "# Héllo\n")
 
+    def test_write_output_rejects_empty_markdown(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            output_path = Path(temp_dir) / "out.md"
+            with self.assertRaisesRegex(ValueError, "empty output"):
+                write_output("   ", output_path)
+
 
 if __name__ == "__main__":
     unittest.main()
