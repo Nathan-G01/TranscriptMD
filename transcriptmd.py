@@ -77,7 +77,7 @@ def group_chapters(lines: Sequence[str]) -> list[tuple[str, str]]:
     output: list[tuple[str, str]] = []
     for chapter_index, chapter_lines in enumerate(chapters, start=1):
         title = chapter_lines[0]
-        if not title.strip():
+        if not title:
             raise ValueError(f"Chapter {chapter_index} is missing a title.")
         body = normalize_whitespace(" ".join(chapter_lines[1:]))
         if not body:
