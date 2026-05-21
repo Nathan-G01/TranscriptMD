@@ -1,0 +1,802 @@
+0:00
+hi my name is Milan and in this video
+0:02
+I'll show you how to create adjacent web
+0:04
+tokens for users that authenticate with
+0:06
+your system you can use a Json web token
+0:09
+to enforce authentication and
+0:10
+authorization on your API and they are
+0:13
+particularly useful in microservices
+0:15
+systems before we dive into generating
+0:17
+jwt's in asp.net core let's spend a
+0:20
+brief moment discussing what is a Json
+0:23
+web token the common abbreviation is JWT
+0:26
+and some people even pronounce this as
+0:28
+jot but what is stands for is Json web
+0:31
+token and another way to represent a
+0:33
+Json web token is as a string with three
+0:36
+distinct components the first one in red
+0:38
+is called a header and this contains
+0:40
+information about which algorithm was
+0:42
+used to encrypt the token then you have
+0:44
+your payload in purple which is usually
+0:46
+the part that you're most interested in
+0:48
+it contains the iser the audience the
+0:51
+subject which is the identifier of the
+0:52
+user that obtained this token and then
+0:54
+you have the signature in blue which
+0:56
+allows you to verify that the Json web
+0:58
+token that was provided to your API is
+1:01
+also the one that was created by your
+1:03
+system this is how you can enforce
+1:04
+authentication with Json web tokens now
+1:07
+we are also going to mention
+1:08
+authorization and how you could go about
+1:10
+that but first let's start by generating
+1:13
+a Json web token we want to create a
+Building the JWT Token Provider
+1:15
+Json web token in the login user use
+1:18
+case instead of returning the user here
+1:20
+we want to return a Json web token as a
+1:22
+string value and then the user can use
+1:24
+this to authenticate with our API I'm
+1:27
+going to start by installing a Nate
+1:29
+package that allows me to work with Json
+1:31
+web tokens I'm going to look for JWT
+1:34
+Bearer and this n package is called
+1:37
+Microsoft aspet core of anation JWT
+1:40
+Bearer let's go ahead and install the
+1:42
+latest version and then I'm going to
+1:44
+create an abstraction in the users
+1:47
+infrastructure folder which I will call
+1:49
+the token provider and this is where I'm
+1:51
+going to implement the logic for
+1:53
+creating a Json web token the only
+1:55
+dependency I need here is the ey
+1:57
+configuration service that's going to
+1:59
+allow me to obtain my application
+2:01
+settings an alternative could be using
+2:04
+the options pattern and providing a
+2:06
+strongly typed options object I want to
+2:08
+keep things simple so let's go the ey
+2:10
+configuration route I'm going to expose
+2:12
+a create method that accepts a user and
+2:14
+we're going to create a Json web token
+2:17
+for this user instance the first thing
+2:19
+we are going to need is a secret key
+2:22
+value and we are going to use this to
+2:23
+sign the Json web token so this is some
+2:26
+sensitive information that you do not
+2:28
+want to expose in any way inside of your
+2:30
+application a safe way to provide this
+2:33
+is using environment variables you can
+2:35
+also provide it through a Secrets
+2:37
+manager I'm going to be using user
+2:39
+secrets in this example so let's go
+2:41
+ahead and create a user secret with this
+2:44
+value on the Cal connect API I'm going
+2:46
+to click manage user secrets and now I
+2:49
+can provide the secret value ideally
+2:51
+this should be something entirely random
+2:53
+and you also want to make it relatively
+2:55
+long for maximum safety I'm just going
+2:57
+to use a dummy value but what you could
+2:59
+do is generate a uu ID and then encode
+3:02
+it as a base 64 string for example with
+3:05
+our user Secret in place let's go back
+3:07
+to the Token provider and what we want
+3:09
+to do is to create a new security key
+3:11
+I'm going to use a symmetric security
+3:14
+key and the argument for this
+3:15
+Constructor is an array of bytes so what
+3:17
+I'm going to do is say encoding utf8 get
+3:22
+bytes and I'm going to specify my secret
+3:24
+key which is a string value let's assume
+3:26
+that this value will never be null so
+3:29
+I'm going to specify ONN forgiving
+3:31
+operator but this is going to throw an
+3:32
+exception either way so that's also fine
+3:34
+then we want to create our signing
+3:36
+credentials by calling new signing
+3:40
+credentials and this accepts a security
+3:42
+key which we already have and the
+3:44
+algorithm is going to be used to sign
+3:47
+this Json web token I'm going to use H
+3:49
+MAA 256 now I'm going to create a token
+3:52
+descriptor which is going to allow me to
+3:54
+provide some claims for my token so
+3:56
+let's create a new security token
+3:58
+descriptor and this is going to allow me
+4:00
+to provide some values such as the
+4:02
+subject which is a claims identity
+4:05
+instance so let's create a new claims
+4:07
+identity and I'm going to provide an
+4:09
+array of claims for this claims identity
+4:11
+instance the first claim is going to be
+4:14
+the JWT registered claim names and I'm
+4:17
+going to use the sub claim and what I
+4:19
+want to set as the value of this claim
+4:22
+is the users identifier of course I have
+4:24
+to convert this into a string one more
+4:26
+thing I could do is use the email claim
+4:28
+and I can provide the user's email
+4:30
+another thing that could be interesting
+4:32
+is if the email is verified or not so
+4:35
+let's specify an email verified claim
+4:38
+and the value is going to be the user
+4:40
+email verified property and we have to
+4:42
+specify to string then you can configure
+4:45
+the exploration time of your Json web
+4:47
+token so I can use UTC now and let's for
+4:51
+example add 60 Minutes to the current
+4:54
+value so our token expires in 60 minutes
+4:56
+you will probably want to configure this
+4:58
+through your application set settings so
+5:00
+you can go ahead and say configuration
+5:02
+get value and obtain some integer value
+5:05
+which could be JWT expiration in minutes
+5:09
+then you can provide your signing
+5:11
+credentials which we already have in the
+5:13
+credentials variable and then you can
+5:15
+provide an issuer which is also going to
+5:17
+come from your application settings so I
+5:19
+will say configuration JWT issuer and
+5:22
+then let's provide the audience which
+5:24
+I'm also going to pull from my
+5:26
+application settings so finally once we
+5:29
+have our token descriptor we need to
+5:31
+create our Json web token Handler so
+5:34
+let's create a new Json web token
+5:37
+Handler and there are a few services
+5:38
+that you can use here another common one
+5:41
+is the JWT security token Handler which
+5:44
+you can also use to create a Json web
+5:45
+token however the recommended way is
+5:48
+using the Json web token Handler and
+5:50
+it's also up to 30% faster than the
+5:52
+other Alternatives so now I can create a
+5:55
+token by saying Handler create token and
+5:58
+this is already going to return a string
+6:00
+and I just need to pass in a token
+6:02
+descriptor so now that I have my Json
+6:05
+web token I can go ahead and return it
+6:07
+from the service now we can use the
+Using the TokenProvider
+6:09
+token Provider from the login user use
+6:12
+case so let's go ahead and inject it and
+6:15
+I'm going to update this use case to
+6:17
+return a string instead of a user and
+6:19
+now I'm going to create a token by using
+6:22
+the token provider create method which
+6:24
+accepts a user argument so now I can
+6:26
+return this token from the login user
+6:28
+use case now the only thing that's left
+6:31
+is to register my token provider as a
+6:33
+service so let's say Builder services at
+6:36
+Singleton and I will specify the token
+6:38
+provider now let's go ahead and provide
+6:41
+our application settings for the Json
+6:43
+web token setup so this is the base
+6:45
+settings and I'm going to provide the
+6:47
+actual values inside of my development
+6:49
+settings file I'm providing the secret
+6:51
+through my user Secrets now the iser is
+6:53
+going to be Cal connect which is our
+6:55
+application let's say the audience say
+6:57
+account and the expiration time in
+6:59
+minutes is going to be an integer and
+7:01
+let's specify the value of 60 and now we
+7:04
+should be ready to start our application
+7:06
+and attempt to log in a user to obtain a
+7:08
+Json web token I'm going to open up the
+Examining the JWT we created
+7:10
+Swagger UI and I'm going to call the
+7:12
+login endpoint for a user that I already
+7:15
+registered and verify their email
+7:17
+address so if I send this request we're
+7:19
+going to land in the login user use case
+7:22
+where we will first fetch the user from
+7:24
+the database verifi our password hash
+7:26
+and if all of that succeeds then we're
+7:28
+going to create AJ web token for this
+7:30
+user now we're going to pull the secret
+7:32
+key from our user secrets in production
+7:35
+this could be an environment variable or
+7:37
+we could even pull this from a Secrets
+7:39
+manager the next step is going to be
+7:41
+creating the signing credentials the
+7:42
+token descriptor ad Json web token
+7:44
+Handler and finally with everything in
+7:47
+place we can go ahead and produce a Json
+7:49
+web token so let's go ahead and return
+7:51
+this from our use case and we can copy
+7:54
+this value here and then I will head
+7:56
+over to JWT doio where I can base my
+8:00
+Json web token and we can examine what
+8:02
+we have inside so you can see in the
+8:04
+header which algorithm was used to sign
+8:07
+this token in the payload here is our
+8:09
+subject claim which matches our user's
+8:11
+identifier then we have the user's email
+8:14
+if the email was verified or not who is
+8:16
+the correct issuer audience and when
+8:18
+this token expires which is 60 minutes
+8:21
+from the time of obtaining the token so
+8:23
+this is just part of the equation the
+8:25
+next thing that we need is to actually
+8:26
+enforce authenication based on this
+8:29
+Chase web tokens properties so let me
+Configuring JWT Authentication
+8:31
+show you how we are going to do this I'm
+8:33
+going to say Builder Services add
+8:36
+authentication and then I'm going to
+8:38
+specify my authentication scheme I can
+8:40
+use JWT beer default to specify the beer
+8:44
+authentication scheme and then I'm going
+8:46
+to say add JWT Bearer this allows me to
+8:49
+provide an action on the JWT Bearer
+8:52
+options type alternatively you can
+8:53
+manage this through application settings
+8:55
+but let's do this in our code and here
+8:57
+you can configure how your Json web
+8:59
+token is going to be validated I'm going
+9:02
+to set false for required https metadata
+9:05
+then I'm going to set the token
+9:07
+validation parameters by providing a new
+9:10
+token validation parameters instance and
+9:12
+here I want to set a few properties one
+9:15
+of them is going to be the isser signing
+9:17
+key you need to create a new symmetric
+9:19
+security key and we're going to obtain
+9:21
+this by saying encoding
+9:23
+utf8 get bytes and then I need to access
+9:26
+the configuration value by saying
+9:28
+Builder configuration JWT secret then I
+9:32
+need to provide the valid isser this is
+9:35
+going to come from Builder configuration
+9:38
+JWT iser we can do the same for the
+9:41
+valid Audience by saying Builder
+9:44
+configuration JWT audience and finally I
+9:48
+want to configure the clocks Q which is
+9:50
+how much tolerance we want to have based
+9:52
+on the exploration value of our Json web
+9:55
+token I'm going to specify time span of
+9:57
+zero which means that we don't tolerate
+9:59
+at any token where the expiration time
+10:01
+is in the past I'm also going to add
+10:03
+authorization Services by saying Builder
+10:06
+Services add authorization and we also
+10:08
+need to include some middleware into our
+10:11
+request pipeline so I'm going to say app
+10:13
+use of fication and then I'm going to
+10:15
+say app use authorization in this
+10:18
+particular order and this is how we can
+10:20
+enable authenication and authorization
+10:23
+in our API and the next thing that's
+10:25
+left to do is to actually use this so
+10:27
+let's go to the user endpoint and let's
+10:29
+add authenication to the get user
+10:31
+endpoint so I'm going to say require
+10:34
+authorization and what this is going to
+10:37
+do under the hood if I go into the
+10:39
+source code is it's going to add an
+10:41
+authorized attribute to this particular
+10:44
+endpoint this is going to apply the
+10:45
+default authorization policy and the
+10:48
+default authorization policy only
+10:50
+requires for the current user to be
+10:52
+authenticated so let's try to explain
+Authentication vs. Authorization
+10:54
+what is the difference between
+10:55
+authentication and authorization
+10:57
+authentication is just figuring out who
+10:59
+is the current user and if they are the
+11:01
+user of this system authorization is
+11:04
+determining what this user is allowed to
+11:06
+do now we can Implement authorization by
+11:09
+specifying some additional claims inside
+11:11
+of our Json web token which we can do
+11:13
+here and typically you would do this
+11:15
+through roles or even permissions for
+11:17
+more granular control I won't be doing
+11:19
+this as part of this video but it should
+11:21
+be simple enough to just include the
+11:23
+relevant roles as additional claims on
+11:25
+the Json web token what this allows you
+11:27
+to do in the user endpoints is to
+11:29
+specify these roles as additional
+11:31
+policies so for example we may have a
+11:34
+registered role so we are going to
+11:35
+specify it here if we had some different
+11:37
+roles we can also pass them in and
+11:39
+essentially you can achieve the same
+11:41
+thing by saying with metadata and
+11:44
+specifying an authorization attribute
+11:46
+the authorization attribute also accepts
+11:49
+a policy and if you want to use roles
+11:52
+you can pass them in using a comma
+11:54
+separated string so let's say I want to
+11:56
+allow this endpoint for registered users
+11:58
+and admin users for whatever reason this
+12:01
+is how I would be able to do it so let's
+12:03
+go with the minimal apis approach which
+12:05
+is require authorization and as I
+12:07
+mentioned this is just going to require
+12:09
+for the current user to be authenticated
+JWT Authentication with Swagger
+12:11
+and before we test this out I want to
+12:13
+show you a bonus implementation detail
+12:16
+and this will be how to integrate Json
+12:17
+web token authentication with the
+12:19
+Swagger user interface so let's create
+12:21
+another class in the extensions folder
+12:23
+that I will call service collection
+12:25
+extensions I'm going to make this an
+12:27
+internal and static type because it's
+12:29
+going to contain extension methods and
+12:31
+then let's create an internal and static
+12:33
+method returning an i service collection
+12:35
+I will call it add Swagger gen with off
+12:38
+and it's going to be an extension method
+12:40
+on the service collection interface
+12:42
+inside of this method I'm going to say
+12:44
+add Swagger gen and let's take the piece
+12:47
+of code that we already have which is
+12:49
+setting up our custom scheme IDs and
+12:51
+instead of that let's call add Swagger
+12:53
+gen with off now let's go back to our
+12:56
+extension method we want to add this
+12:58
+piece of code back but I'm also going to
+13:00
+introduce an open API security scheme
+13:03
+object this is how I'm going to define a
+13:04
+new security definition for my Swagger
+13:07
+gen document and I'm going to provide
+13:09
+this security definition for the bearer
+13:11
+scheme which I can obtain from JWT
+13:13
+Bearer defaults and there's an
+13:14
+authentication scheme constant and one
+13:16
+more thing we need to do is to create an
+13:18
+open API security requirement where we
+13:21
+need to provide an open API security
+13:23
+scheme and essentially we want to
+13:25
+reference the barer scheme again I'm
+13:26
+going to add the security requirement
+13:28
+using the respective method and this
+13:30
+will be enough to configure Json web
+13:33
+token authenication through the Swagger
+13:35
+user interface now let's start our
+13:37
+application and let me show you how this
+13:38
+works one change that you can see here
+13:41
+is the presence of the authorized icon
+13:43
+if I click this icon it's going to open
+13:45
+up a popup where I can provide the Json
+13:47
+web token value and authorize with my
+13:49
+API now let's try to fetch the user
+13:53
+based on their identifier and I pull
+13:55
+this value from the subject claim on the
+13:57
+Json web token and if I send this I will
+13:59
+get back a 401 unauthorized response now
+14:03
+let's try logging in by specifying Milan
+14:06
+atkc connect.com which are my email and
+14:10
+password and if I execute this we should
+14:12
+get back a Json web token so I'm going
+14:14
+to copy this value and you can also
+14:16
+provide this from the lock icon on the
+14:18
+endpoint I'm going to paste in the Json
+14:20
+web token value and click authorize and
+14:23
+now we are logged in so we can close
+14:25
+this down and if I send this request we
+14:27
+will get back the user because we are
+14:30
+correctly authenticated with our API
+14:32
+using a Json web token so this is how
+14:34
+you can generate a Json web token using
+14:36
+the Json web token Handler type you can
+14:39
+extend this to add more claims for
+14:41
+implementing authorization this could be
+14:43
+roles and permissions and this allows
+14:45
+you to implement granular control inside
+14:47
+of your system if you don't want to
+14:48
+implement everything yourself you can
+14:50
+always use a robust identity provider
+14:52
+and keycloak is a great option so you
+14:54
+should watch this video next to learn
+14:56
+more about keycloak check out my cleaner
+14:59
+architecture and modular monolith
+15:00
+courses to improve your skills and until
+15:02
+next time stay awesome
