@@ -9,9 +9,11 @@ from pathlib import Path
 from transcriptmd import (
     generate_markdown,
     group_chapters,
+    normalize_whitespace,
     output_filename_from_title,
     read_input,
     remove_timestamps,
+    write_output,
 )
 
 
@@ -59,6 +61,18 @@ class TranscriptMDTests(unittest.TestCase):
 
     def test_output_filename_from_title(self) -> None:
         self.assertEqual(output_filename_from_title("My Cool Video"), "my_cool_video.md")
+
+    def test_normalize_whitespace(self) -> None:
+        self.assertEqual(normalize_whitespace("  a\t b\n\n c  "), "a b c")
+
+    def test_write_output_creates_parent_and_writes_utf8(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            output_path = Path(temp_dir) / "nested" / "out.md"
+            written_path = write_output("# Héllo\n", output_path)
+
+            self.assertEqual(written_path, output_path)
+            self.assertTrue(output_path.exists())
+            self.assertEqual(output_path.read_text(encoding="utf-8"), "# Héllo\n")
 
 
 if __name__ == "__main__":

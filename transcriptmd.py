@@ -81,7 +81,7 @@ def group_chapters(lines: Sequence[str]) -> list[tuple[str, str]]:
             raise ValueError(f"Chapter {chapter_index} is missing a title.")
         body = normalize_whitespace(" ".join(chapter_lines[1:]))
         if not body:
-            raise ValueError(f"Chapter {chapter_index} has no chapter text.")
+            raise ValueError(f"Chapter {chapter_index} has no body text after the title.")
         output.append((title, body))
 
     if not output:
