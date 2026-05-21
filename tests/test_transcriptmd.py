@@ -90,6 +90,10 @@ class TranscriptMDTests(unittest.TestCase):
         lines = ["Intro", "This is plain text", "", "Deep Dive", "More details"]
         self.assertEqual(remove_timestamps(lines), lines)
 
+    def test_remove_timestamps_handles_extra_space_after_timestamp(self) -> None:
+        cleaned = remove_timestamps(["00:00   Intro text", "01:02      More text"])
+        self.assertEqual(cleaned, ["Intro text", "More text"])
+
 
 if __name__ == "__main__":
     unittest.main()
