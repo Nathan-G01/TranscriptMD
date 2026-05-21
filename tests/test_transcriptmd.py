@@ -16,7 +16,7 @@ from transcriptmd import (
 
 
 class TranscriptMDTests(unittest.TestCase):
-    def test_read_txt_and_transform(self) -> None:
+    def test_full_pipeline_txt_to_markdown(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
             input_path = Path(temp_dir) / "input.txt"
             input_path.write_text(
