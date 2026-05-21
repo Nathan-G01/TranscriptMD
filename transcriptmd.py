@@ -10,7 +10,7 @@ from typing import Sequence
 
 
 TIMESTAMP_PATTERN = re.compile(r"^\s*\d+:[0-5]\d\s*$")
-TIMESTAMP_PREFIX_PATTERN = re.compile(r"^\s*\d+:[0-5]\d\s+(.+)\s*$")
+TIMESTAMP_PREFIX_PATTERN = re.compile(r"^\s*\d+:[0-5]\d\s*(.+)\s*$")
 WHITESPACE_PATTERN = re.compile(r"\s+")
 
 

@@ -98,6 +98,10 @@ class TranscriptMDTests(unittest.TestCase):
         cleaned = remove_timestamps(["100:00", "125:07 Long form content"])
         self.assertEqual(cleaned, ["Long form content"])
 
+    def test_remove_timestamps_accepts_no_space_after_timestamp(self) -> None:
+        cleaned = remove_timestamps(["1:23No-space text"])
+        self.assertEqual(cleaned, ["No-space text"])
+
 
 if __name__ == "__main__":
     unittest.main()
